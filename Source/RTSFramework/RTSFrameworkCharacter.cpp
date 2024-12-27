@@ -85,6 +85,8 @@ void ARTSFrameworkCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARTSFrameworkCharacter::Look);
+
+	    EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ARTSFrameworkCharacter::Interact);
 	}
 	else
 	{
@@ -126,4 +128,12 @@ void ARTSFrameworkCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void ARTSFrameworkCharacter::Interact()
+{
+    AsyncTask(ENamedThreads::Type::GLThread, []()
+    {
+        UE_LOG(LogTemplateCharacter, Display, TEXT("Interacting"));
+    });
 }

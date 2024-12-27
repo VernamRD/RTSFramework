@@ -8,6 +8,11 @@
 			"Name": "RTSFramework",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "GLT",
+			"Type": "Runtime",
+			"LoadingPhase": "EarliestPossible"
 		}
 	],
 	"Plugins": [
