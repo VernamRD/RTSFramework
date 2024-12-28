@@ -137,3 +137,13 @@ void ARTSFrameworkCharacter::Interact()
         UE_LOG(LogTemplateCharacter, Display, TEXT("Interacting"));
     });
 }
+
+void ARTSFrameworkCharacter::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+}
+
+void ARTSFrameworkCharacter::GLTTick(float TimeModifier)
+{
+    FGLTickableGameObject::GLTTick(TimeModifier);
+}

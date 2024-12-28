@@ -19,7 +19,9 @@ public class GLT : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "Slate",
-                "SlateCore"
+                "SlateCore",
+                
+                "RenderCore"
             }
         );
     }

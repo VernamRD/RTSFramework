@@ -1,17 +1,17 @@
 ﻿#include "GLT.h"
 
-#include "Core/GLTCore.h"
+#include "Core/GLThreadInitializer.h"
 
 #define LOCTEXT_NAMESPACE "FGLTModule"
 
 void FGLTModule::StartupModule()
 {
-    GLT::IGLT::Initialize();
+    FGLThreadInitializer::Initialize();
 }
 
 void FGLTModule::ShutdownModule()
 {
-    GLT::IGLT::Deinitialize();
+    FGLThreadInitializer::Deinitialize();
 }
 
 #undef LOCTEXT_NAMESPACE
