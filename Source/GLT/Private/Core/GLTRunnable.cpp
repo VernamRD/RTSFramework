@@ -4,6 +4,7 @@
 #include "RenderTimer.h"
 #include "Core/GLTCore.h"
 #include "Core/GLTTickTaskManager.h"
+#include "HAL/ThreadHeartBeat.h"
 
 #if DO_CHECK
 std::atomic<int8> FGLTRunnable::Debug_ThreadCounter = 0;
@@ -13,7 +14,7 @@ FGLTRunnable::FGLTRunnable()
 {
 #if DO_CHECK
     checkf(Debug_ThreadCounter == 0, TEXT("Attempt to create a second FGLTRunnable"));
-    
+
     ++Debug_ThreadCounter;
 #endif
 }
@@ -28,8 +29,7 @@ FGLTRunnable::~FGLTRunnable()
 bool FGLTRunnable::Init()
 {
     FTaskGraphInterface::Get().AttachToThread(ENamedThreads::GLThread);
-    bPendingNewTimeModifier = true;
-    NewTimeModifier = 1.0f;
+    EndFrameEvent = FPlatformProcess::GetSynchEventFromPool();
     return true;
 }
 
@@ -37,7 +37,7 @@ uint32 FGLTRunnable::Run()
 {
     while (StopThreadCounter == 0 && !IsEngineExitRequested())
     {
-        ApplyTimeModifier();
+        FThreadHeartBeat::Get().HeartBeat();
 
         uint32 CurrentTime = FPlatformTime::Cycles();
 
@@ -46,16 +46,33 @@ uint32 FGLTRunnable::Run()
 
         {
             TRACE_CPUPROFILER_EVENT_SCOPE(GLT::Tick);
-            FGLTTickTaskManager::Get().Tick(TimeModifier);
+            FGLTTickTaskManager::Get().Tick(GLTToGTCycleRatio);
+        }
+
+        FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GLThread);
+        
+        uint32 GLTTime = FPlatformTime::Cycles() - CurrentTime;
+        if (GLTTime == 0 || GGameThreadTime == 0)
+        {
+            FPlatformProcess::Sleep(0.005f);
+        }
+        else
+        {
+            GLTToGTCycleRatio = FPlatformTime::ToMilliseconds(GLTTime) / FPlatformTime::ToMilliseconds(GGameThreadTime);
+
+            // We should not allow GLT to be executed more often than GameThread.
+            if (GLTToGTCycleRatio < 1.f)
+            {
+                AsyncTask(ENamedThreads::GameThread, [this]()
+                {
+                    FCoreDelegates::OnEndFrame.AddRaw(this, &FGLTRunnable::OnEndFrame); 
+                });
+                
+                EndFrameEvent->Wait();
+            }
         }
         
-        FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GLThread);
-        FPlatformProcess::Sleep(0.005f);
-
         TRACE_END_REGION(RegionName);
-
-        uint32 GLTTime = FPlatformTime::Cycles() - CurrentTime;
-        GTToGLTCycleRatio = GGameThreadTime / GLTTime;
     }
 
     FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GLThread);
@@ -68,21 +85,13 @@ void FGLTRunnable::Stop()
     ++StopThreadCounter;
 }
 
-void FGLTRunnable::SetTimeModifier(float InNewTimeModifier)
-{
-    NewTimeModifier = InNewTimeModifier;
-    bPendingNewTimeModifier = true;
-}
-
 void FGLTRunnable::Exit()
 {
     FRunnable::Exit();
 }
 
-void FGLTRunnable::ApplyTimeModifier()
+void FGLTRunnable::OnEndFrame()
 {
-    if (bPendingNewTimeModifier.load() == false) return;
-
-    TimeModifier = NewTimeModifier.load();
-    bPendingNewTimeModifier = false;
+    FCoreDelegates::OnEndFrame.RemoveAll(this);
+    EndFrameEvent->Trigger();
 }

@@ -5,5 +5,5 @@
 #include "CoreMinimal.h"
 
 GLT_API bool IsGLTValid();
-GLT_API float GetGTToGLTCycleRatio();
+GLT_API float GetGLTToGTCycleRatio();
 GLT_API bool IsInGLThread();

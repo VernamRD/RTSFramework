@@ -9,11 +9,11 @@ bool IsGLTValid()
     return IGLTThreadProvider::GetGameLogicRunnableThread() != nullptr && IGLTThreadProvider::GetGameLogicRunnable() != nullptr;
 }
 
-float GetGTToGLTCycleRatio()
+float GetGLTToGTCycleRatio()
 {
     if (!IsGLTValid()) return TNumericLimits<float>::Min();
 
-    return IGLTThreadProvider::GetGameLogicRunnable()->GetGTToGLTRatio();
+    return IGLTThreadProvider::GetGameLogicRunnable()->GetGLTToGTRatio();
 }
 
 bool IsInGLThread()

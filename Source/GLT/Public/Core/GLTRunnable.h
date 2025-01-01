@@ -14,21 +14,16 @@ public:
     virtual uint32 Run() override;
     virtual void Stop() override;
     bool IsStopped() const { return StopThreadCounter > 0; }
-    
-    float GetTimeModifier() const { return TimeModifier; }
-    void SetTimeModifier(float InNewTimeModifier);
 
-    float GetGTToGLTRatio() const { return GTToGLTCycleRatio; }
+    float GetGLTToGTRatio() const { return GLTToGTCycleRatio; }
 
     virtual void Exit() override;
 
 private:
-    std::atomic<float> GTToGLTCycleRatio;
-
-    void ApplyTimeModifier();
-    std::atomic<float> TimeModifier;
-    std::atomic<float> NewTimeModifier;
-    std::atomic<bool> bPendingNewTimeModifier;
+    FEvent* EndFrameEvent;
+    void OnEndFrame();
+    
+    std::atomic<float> GLTToGTCycleRatio;
     
     std::atomic<int32> StopThreadCounter;
     

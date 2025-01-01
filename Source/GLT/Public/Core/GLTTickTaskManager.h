@@ -14,7 +14,7 @@ public:
         return Singleton;
     }
     
-    void Tick(float TimeModifier);
+    void Tick(float GLTToGTCycleRatio);
     virtual void AddTickableObject(FGLTickableGameObject* Object) override;
     virtual void RemoveTickableObject(FGLTickableGameObject* Object) override;
     
