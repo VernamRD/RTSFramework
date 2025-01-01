@@ -12,9 +12,11 @@ std::atomic<int8> FGLTRunnable::Debug_ThreadCounter = 0;
 
 FGLTRunnable::FGLTRunnable()
 {
+    GLTDeltaSeconds = FApp::GetDeltaTime();
+    EndFrameEvent = nullptr;
+    
 #if DO_CHECK
     checkf(Debug_ThreadCounter == 0, TEXT("Attempt to create a second FGLTRunnable"));
-
     ++Debug_ThreadCounter;
 #endif
 }
@@ -46,23 +48,24 @@ uint32 FGLTRunnable::Run()
 
         {
             TRACE_CPUPROFILER_EVENT_SCOPE(GLT::Tick);
-            FGLTTickTaskManager::Get().Tick(GLTToGTCycleRatio);
+            FGLTTickTaskManager::Get().Tick(GLTDeltaSeconds);
         }
 
         FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GLThread);
         
-        uint32 GLTTime = FPlatformTime::Cycles() - CurrentTime;
-        if (GLTTime == 0 || GGameThreadTime == 0)
+        uint32 GLTWorkTime = FPlatformTime::Cycles() - CurrentTime;
+        if (GLTWorkTime == 0 || GGameThreadTime == 0)
         {
             FPlatformProcess::Sleep(0.005f);
         }
         else
         {
-            GLTToGTCycleRatio = FPlatformTime::ToMilliseconds(GLTTime) / FPlatformTime::ToMilliseconds(GGameThreadTime);
+            GLTToGTCycleRatio = FPlatformTime::ToMilliseconds(GLTWorkTime) / FPlatformTime::ToMilliseconds(GGameThreadTime);
 
             // We should not allow GLT to be executed more often than GameThread.
             if (GLTToGTCycleRatio < 1.f)
             {
+                // Safe delegate subscribe
                 AsyncTask(ENamedThreads::GameThread, [this]()
                 {
                     FCoreDelegates::OnEndFrame.AddRaw(this, &FGLTRunnable::OnEndFrame); 
@@ -71,6 +74,8 @@ uint32 FGLTRunnable::Run()
                 EndFrameEvent->Wait();
             }
         }
+
+        GLTDeltaSeconds = FPlatformTime::ToSeconds(FPlatformTime::Cycles() - CurrentTime);
         
         TRACE_END_REGION(RegionName);
     }

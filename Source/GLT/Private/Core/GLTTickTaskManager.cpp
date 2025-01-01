@@ -8,7 +8,7 @@ IGLTTickTaskManager& IGLTTickTaskManager::Get()
     return FGLTTickTaskManager::Get();
 }
 
-void FGLTTickTaskManager::Tick(float GLTToGTCycleRatio)
+void FGLTTickTaskManager::Tick(float DeltaSeconds)
 {
     // Pending Objects
     {
@@ -32,10 +32,10 @@ void FGLTTickTaskManager::Tick(float GLTToGTCycleRatio)
 
     if (!GWorld || !GWorld->IsGameWorld()) return;
 
-    const float TimeModifier = GWorld->GetWorldSettings()->GetEffectiveTimeDilation() * GLTToGTCycleRatio;
+    const float ResultDeltaTime = DeltaSeconds * GWorld->GetWorldSettings()->GetEffectiveTimeDilation();
     for (FGLTickableGameObject* TickableObject : TickableObjects)
     {
-        TickableObject->GLTTick(TimeModifier);
+        TickableObject->GLTTick(ResultDeltaTime);
     }
 }
 

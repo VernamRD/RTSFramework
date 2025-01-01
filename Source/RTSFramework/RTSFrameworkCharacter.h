@@ -65,7 +65,7 @@ protected:
 
     void Interact();
     virtual void Tick(float DeltaSeconds) override;
-    virtual void GLTTick(float TimeModifier) override;
+    virtual void GLTTick(float DeltaSeconds) override;
 
 	virtual void NotifyControllerChanged() override;
 

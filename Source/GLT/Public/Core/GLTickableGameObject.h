@@ -10,6 +10,6 @@ public:
     FGLTickableGameObject();
     virtual ~FGLTickableGameObject();
     
-    virtual void GLTTick(float TimeModifier) {}
-    virtual void GLTAsyncTick(float TimeModifier) {}
+    virtual void GLTTick(float DeltaSeconds) {}
+    virtual void GLTAsyncTick(float DeltaSeconds) {}
 };

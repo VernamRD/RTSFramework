@@ -25,6 +25,8 @@ private:
     
     std::atomic<float> GLTToGTCycleRatio;
     
+    std::atomic<float> GLTDeltaSeconds;
+    
     std::atomic<int32> StopThreadCounter;
     
 #if DO_CHECK

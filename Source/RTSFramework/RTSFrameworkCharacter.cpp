@@ -143,7 +143,7 @@ void ARTSFrameworkCharacter::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
 }
 
-void ARTSFrameworkCharacter::GLTTick(float TimeModifier)
+void ARTSFrameworkCharacter::GLTTick(float DeltaSeconds)
 {
-    FGLTickableGameObject::GLTTick(TimeModifier);
+    FGLTickableGameObject::GLTTick(DeltaSeconds);
 }
