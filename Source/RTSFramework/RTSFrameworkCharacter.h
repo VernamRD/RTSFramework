@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GLT/Public/Core/GLTickableGameObject.h"
+#include "GLT/Public/Core/GLTGameObject.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "RTSFrameworkCharacter.generated.h"
@@ -17,7 +17,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class ARTSFrameworkCharacter : public ACharacter, public FGLTickableGameObject
+class ARTSFrameworkCharacter : public ACharacter, public FGLTGameObject
 {
 	GENERATED_BODY()
 
@@ -65,7 +65,11 @@ protected:
 
     void Interact();
     virtual void Tick(float DeltaSeconds) override;
+    
     virtual void GLTTick(float DeltaSeconds) override;
+    virtual void GLTAsyncTick(float DeltaSeconds) override;
+    virtual bool IsGLTTickable() const override { return true; }
+    virtual bool IsGLTAsyncTickable() const override { return true; }
 
 	virtual void NotifyControllerChanged() override;
 

@@ -16,6 +16,7 @@ public:
     bool IsStopped() const { return StopThreadCounter > 0; }
 
     float GetGLTToGTRatio() const { return GLTToGTCycleRatio; }
+    float GetGLTDeltaSeconds() const { return GLTDeltaSeconds; }
 
     virtual void Exit() override;
 

@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 
-class GLT_API FGLTickableGameObject
+class GLT_API IGLTGameObject
 {
 public:
-    FGLTickableGameObject();
-    virtual ~FGLTickableGameObject();
+    virtual ~IGLTGameObject() {}
     
     virtual void GLTTick(float DeltaSeconds) {}
+    virtual bool IsGLTTickable() const { return false; }
     virtual void GLTAsyncTick(float DeltaSeconds) {}
+    virtual bool IsGLTAsyncTickable() const { return false; }
 };

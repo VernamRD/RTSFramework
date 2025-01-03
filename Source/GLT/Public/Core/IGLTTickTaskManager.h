@@ -3,15 +3,26 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "IGLTGameObject.h"
 
-class FGLTickableGameObject;
+enum class EGLTTickType
+{
+    Default,
+    Async,
+
+    // ONLY FOR COUNT ENUM FIELDS
+    COUNT,
+};
 
 class GLT_API IGLTTickTaskManager
 {
 public:
     virtual ~IGLTTickTaskManager() {}
     static IGLTTickTaskManager& Get();
-
-    virtual void AddTickableObject(FGLTickableGameObject* Object) {}
-    virtual void RemoveTickableObject(FGLTickableGameObject* Object) {}
+    
+    virtual void RegisterGLTTickableGameObject(IGLTGameObject* Object) {}
+    virtual void UnregisterGLTTickableGameObject(IGLTGameObject* Object) {}
+    
+    virtual void AddTickableObject(EGLTTickType TickType, IGLTGameObject* Object) {}
+    virtual void RemoveTickableObject(EGLTTickType TickType, IGLTGameObject* Object) {}
 };

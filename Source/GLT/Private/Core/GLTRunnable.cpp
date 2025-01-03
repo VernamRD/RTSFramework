@@ -47,15 +47,35 @@ uint32 FGLTRunnable::Run()
         TRACE_BEGIN_REGION(RegionName);
 
         {
-            TRACE_CPUPROFILER_EVENT_SCOPE(GLT::Tick);
-            FGLTTickTaskManager::Get().Tick(GLTDeltaSeconds);
+            TRACE_CPUPROFILER_EVENT_SCOPE(GLT::PreTickTasks);
+            FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GLThread);
         }
 
-        FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GLThread);
+        FMultiFutureHandle Handle;
+        if (FGLTTickTaskManager::CanTick())
+        {
+            TRACE_CPUPROFILER_EVENT_SCOPE(GLT::Tick);
+            Handle = FGLTTickTaskManager::Get().Tick(GLTDeltaSeconds);
+        }
+
+        bool bNeedPostTickTaskProcess = !Handle.IsReady();
+        
+        {
+            TRACE_CPUPROFILER_EVENT_SCOPE(GLT::Tasks);
+            FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GLThread);
+        }
+
+        if (bNeedPostTickTaskProcess)
+        {
+            TRACE_CPUPROFILER_EVENT_SCOPE(GLT::PostAllTickTasks);
+            Handle.Wait();
+            FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GLThread);
+        }
         
         uint32 GLTWorkTime = FPlatformTime::Cycles() - CurrentTime;
         if (GLTWorkTime == 0 || GGameThreadTime == 0)
         {
+            // Minimum delay of the thread until it is tied to the GT execution time
             FPlatformProcess::Sleep(0.005f);
         }
         else
